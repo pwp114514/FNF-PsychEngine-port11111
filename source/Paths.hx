@@ -401,7 +401,7 @@ class Paths
 
 	#if MODS_ALLOWED
 	inline static public function mods(key:String = '') {
-		return Sys.getCwd() + 'mods/' + key;
+		return 'mods/' + key;
 	}
 
 	inline static public function modsFont(key:String) {
@@ -460,7 +460,7 @@ class Paths
 				return fileToCheck;
 
 		}
-		return Sys.getCwd() + 'mods/' + key;
+		return 'mods/' + key;
 	}
 
 	public static var globalMods:Array<String> = [];
