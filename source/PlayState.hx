@@ -1,7 +1,7 @@
 package;
 
 import flixel.graphics.FlxGraphic;
-#if DISCORD_ALLOWED
+#if desktop
 import Discord.DiscordClient;
 #end
 import Section.SwagSection;
@@ -290,7 +290,7 @@ class PlayState extends MusicBeatState
 	public var opponentCameraOffset:Array<Float> = null;
 	public var girlfriendCameraOffset:Array<Float> = null;
 
-	#if DISCORD_ALLOWED
+	#if desktop
 	// Discord RPC variables
 	var storyDifficultyText:String = "";
 	var detailsText:String = "";
@@ -399,7 +399,7 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
-		grpNoteSplashes = new FlxTypedGroup<NoteSplash>(8);
+		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 		CustomFadeTransition.nextCamera = camOther;
@@ -413,7 +413,7 @@ class PlayState extends MusicBeatState
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 
-		#if DISCORD_ALLOWED
+		#if desktop
 		storyDifficultyText = CoolUtil.difficulties[storyDifficulty];
 
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
@@ -1083,13 +1083,6 @@ class PlayState extends MusicBeatState
 
 		// startCountdown();
 
-		#if !android
-		addVirtualPad(NONE, P);
-		addVirtualPadCamera();
-		virtualPad.visible = true;
-		#end
-		addMobileControls();
-
 		generateSong(SONG.song);
 
 		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
@@ -1366,7 +1359,7 @@ class PlayState extends MusicBeatState
 
 		precacheList.set('alphabet', 'image');
 	
-		#if DISCORD_ALLOWED
+		#if desktop
 		// Updating Discord Rich Presence.
 		DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
 		#end
@@ -2115,7 +2108,7 @@ class PlayState extends MusicBeatState
 				//if(ClientPrefs.middleScroll) opponentStrums.members[i].visible = false;
 			}
 
-			startedCountdown = mobileControls.visible = true;
+			startedCountdown = true;
 			Conductor.songPosition = -Conductor.crochet * 5;
 			setOnLuas('startedCountdown', true);
 			callOnLuas('onCountdownStarted', []);
@@ -2282,7 +2275,7 @@ class PlayState extends MusicBeatState
 				daNote.visible = false;
 				daNote.ignoreNote = true;
 
-				//daNote.kill();
+				daNote.kill();
 				unspawnNotes.remove(daNote);
 				daNote.destroy();
 			}
@@ -2298,7 +2291,7 @@ class PlayState extends MusicBeatState
 				daNote.visible = false;
 				daNote.ignoreNote = true;
 
-				//daNote.kill();
+				daNote.kill();
 				notes.remove(daNote, true);
 				daNote.destroy();
 			}
@@ -2402,7 +2395,7 @@ class PlayState extends MusicBeatState
 				});
 		}
 
-		#if DISCORD_ALLOWED
+		#if desktop
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
 		#end
@@ -2809,7 +2802,7 @@ class PlayState extends MusicBeatState
 			paused = false;
 			callOnLuas('onResume', []);
 
-			#if DISCORD_ALLOWED
+			#if desktop
 			if (startTimer != null && startTimer.finished)
 			{
 				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
@@ -2826,7 +2819,7 @@ class PlayState extends MusicBeatState
 
 	override public function onFocus():Void
 	{
-		#if DISCORD_ALLOWED
+		#if desktop
 		if (health > 0 && !paused)
 		{
 			if (Conductor.songPosition > 0.0)
@@ -2845,7 +2838,7 @@ class PlayState extends MusicBeatState
 
 	override public function onFocusLost():Void
 	{
-		#if DISCORD_ALLOWED
+		#if desktop
 		if (health > 0 && !paused)
 		{
 			DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
@@ -2915,7 +2908,7 @@ class PlayState extends MusicBeatState
 						var particle = phillyGlowParticles.members[i];
 						if(particle.alpha < 0)
 						{
-							//particle.kill();
+							particle.kill();
 							phillyGlowParticles.remove(particle, true);
 							particle.destroy();
 						}
@@ -2926,7 +2919,7 @@ class PlayState extends MusicBeatState
 				if(!ClientPrefs.lowQuality) {
 					grpLimoParticles.forEach(function(spr:BGSprite) {
 						if(spr.animation.curAnim.finished) {
-							//spr.kill();
+							spr.kill();
 							grpLimoParticles.remove(spr, true);
 							spr.destroy();
 						}
@@ -3039,7 +3032,7 @@ class PlayState extends MusicBeatState
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
 		}
 
-		if (#if android FlxG.android.justReleased.BACK #else virtualPad.buttonP.justPressed #end || controls.PAUSE && startedCountdown && canPause)
+		if (controls.PAUSE && startedCountdown && canPause)
 		{
 			var ret:Dynamic = callOnLuas('onPause', [], false);
 			if(ret != FunkinLua.Function_Stop) {
@@ -3295,7 +3288,7 @@ class PlayState extends MusicBeatState
 						daNote.active = false;
 						daNote.visible = false;
 
-						//daNote.kill();
+						daNote.kill();
 						notes.remove(daNote, true);
 						daNote.destroy();
 					}
@@ -3352,12 +3345,12 @@ class PlayState extends MusicBeatState
 		openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 		//}
 
-		#if DISCORD_ALLOWED
+		#if desktop
 		DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
 		#end
 	}
 
-	public function openChartEditor()
+	function openChartEditor()
 	{
 		persistentUpdate = false;
 		paused = true;
@@ -3365,7 +3358,7 @@ class PlayState extends MusicBeatState
 		MusicBeatState.switchState(new ChartingState());
 		chartingMode = true;
 
-		#if DISCORD_ALLOWED
+		#if desktop
 		DiscordClient.changePresence("Chart Editor", null, null, true);
 		#end
 	}
@@ -3396,7 +3389,7 @@ class PlayState extends MusicBeatState
 
 				// MusicBeatState.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
-				#if DISCORD_ALLOWED
+				#if desktop
 				// Game Over doesn't get his own variable because it's only used here
 				DiscordClient.changePresence("Game Over - " + detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
 				#end
@@ -3922,7 +3915,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		mobileControls.visible = #if !android virtualPad.visible = #end false;
 		timeBarBG.visible = false;
 		timeBar.visible = false;
 		timeTxt.visible = false;
@@ -4078,7 +4070,7 @@ class PlayState extends MusicBeatState
 			daNote.active = false;
 			daNote.visible = false;
 
-			//daNote.kill();
+			daNote.kill();
 			notes.remove(daNote, true);
 			daNote.destroy();
 		}
@@ -4165,7 +4157,6 @@ class PlayState extends MusicBeatState
 			pixelShitPart2 = '-pixel';
 		}
 
-		if (ClientPrefs.popUpScore) {
 		rating.loadGraphic(Paths.image(pixelShitPart1 + daRating.image + pixelShitPart2));
 		rating.cameras = [camHUD];
 		rating.screenCenter();
@@ -4231,14 +4222,14 @@ class PlayState extends MusicBeatState
 		}
 		if (!ClientPrefs.comboStacking)
 		{
-			//if (lastCombo != null) lastCombo.kill();
+			if (lastCombo != null) lastCombo.kill();
 			lastCombo = comboSpr;
 		}
 		if (lastScore != null)
 		{
 			while (lastScore.length > 0)
 			{
-				//lastScore[0].kill();
+				lastScore[0].kill();
 				lastScore.remove(lastScore[0]);
 			}
 		}
@@ -4310,7 +4301,6 @@ class PlayState extends MusicBeatState
 			},
 			startDelay: Conductor.crochet * 0.002 / playbackRate
 		});
-		}
 	}
 
 	public var strumsBlocked:Array<Bool> = [];
@@ -4355,7 +4345,7 @@ class PlayState extends MusicBeatState
 					{
 						for (doubleNote in pressNotes) {
 							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
-								//doubleNote.kill();
+								doubleNote.kill();
 								notes.remove(doubleNote, true);
 								doubleNote.destroy();
 							} else
@@ -4521,7 +4511,7 @@ class PlayState extends MusicBeatState
 		//Dupe note remove
 		notes.forEachAlive(function(note:Note) {
 			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
-				//note.kill();
+				note.kill();
 				notes.remove(note, true);
 				note.destroy();
 			}
@@ -4650,7 +4640,7 @@ class PlayState extends MusicBeatState
 
 		if (!note.isSustainNote)
 		{
-			//note.kill();
+			note.kill();
 			notes.remove(note, true);
 			note.destroy();
 		}
@@ -4687,7 +4677,7 @@ class PlayState extends MusicBeatState
 				note.wasGoodHit = true;
 				if (!note.isSustainNote)
 				{
-					//note.kill();
+					note.kill();
 					notes.remove(note, true);
 					note.destroy();
 				}
@@ -4757,7 +4747,7 @@ class PlayState extends MusicBeatState
 
 			if (!note.isSustainNote)
 			{
-				//note.kill();
+				note.kill();
 				notes.remove(note, true);
 				note.destroy();
 			}
